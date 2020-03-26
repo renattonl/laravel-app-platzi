@@ -1,0 +1,83 @@
+version: '3'
+services:
+
+  #PHP Service
+  curso_laravel:
+    build: ./
+    image: curso_laravel
+    container_name: curso_laravel
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www
+    user: "laraveluser:laraveluser"
+    env_file:
+      - .env
+    depends_on:
+      - curso_laravel_db
+    volumes:
+      - ./:/var/www
+      - ./DockerConfig/php/php.ini:/usr/local/etc/php/php.ini
+    networks:
+      - red_curso_laravel
+
+  #Nginx Service
+  curso_laravel_nginx:
+    image: nginx:alpine
+    container_name: curso_laravel_nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 8001:80
+    depends_on:
+      - curso_laravel
+    volumes:
+      - ./:/var/www
+      - ./DockerConfig/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - red_curso_laravel
+
+  #MySQL Service
+  curso_laravel_db:
+    image: mysql:5.7
+    container_name: curso_laravel_db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8002:3306"
+    environment:
+      MYSQL_USER: user
+      MYSQL_PASSWORD: "pass"
+      MYSQL_DATABASE: db
+      MYSQL_ROOT_PASSWORD: "AJsCmT1nIb0"
+    volumes:
+      - ./database/backups/:/docker-entrypoint-initdb.d/
+      - dbcursolaravel:/var/lib/mysql
+      - ./DockerConfig/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - red_curso_laravel
+
+  #Phpmyadmin
+  curso_laravel_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: curso_laravel_phpmyadmin
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 8003:80
+    depends_on:
+      - curso_laravel_db
+    environment:
+      PMA_HOST: curso_laravel_db
+      UPLOAD_LIMIT: 536870912‬
+    networks:
+      - red_curso_laravel
+
+#Networks
+networks:
+  red_curso_laravel:
+    driver: bridge
+
+#Volumes
+volumes:
+  dbcursolaravel:
+    driver: local
