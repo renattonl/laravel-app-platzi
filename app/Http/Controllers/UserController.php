@@ -7,30 +7,30 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller{
 
-    public function index(){
-        $users = User::latest()->get();
-        return view("users.index", [
-            "users" => $users
-        ]);
-    }
-
-    public function store(Request $request){
-      $request->validate([
-        "name" => "required",
-        "email" => "required|email|unique:users",
-        "password" => "required|min:8"
+  public function index(){
+      $users = User::latest()->get();
+      return view("users.index", [
+          "users" => $users
       ]);
-        User::create([
-            "name" => $request->input("name"),
-            "email" => $request->input("email"),
-            "password" => bcrypt($request->input("password"))
-        ]);
+  }
 
-        return back();
-    }
+  public function store(Request $request){
+    $request->validate([
+      "name" => "required",
+      "email" => "required|email|unique:users",
+      "password" => "required|min:8"
+    ]);
+      User::create([
+          "name" => $request->input("name"),
+          "email" => $request->input("email"),
+          "password" => bcrypt($request->input("password"))
+      ]);
 
-    public function destroy(User $user){
-        $user->delete();
-        return back();
-    }
+      return back();
+  }
+
+  public function destroy(User $user){
+      $user->delete();
+      return back();
+  }
 }
